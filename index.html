@@ -1,0 +1,170 @@
+import React, { useState } from 'react';
+import { 
+  Search, 
+  Settings, 
+  Plus, 
+  FileText, 
+  ChevronRight, 
+  MoreHorizontal, 
+  Share, 
+  Menu,
+  MessageSquare
+} from 'lucide-react';
+
+export default function NotionCloneApp() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // 가상의 페이지 데이터 상태 관리
+  const [pages, setPages] = useState([
+    { id: 1, icon: '👋', title: '시작하기 (Getting Started)', content: '여기를 클릭하여 내용을 작성해보세요. 노션과 비슷하게 깔끔한 UI를 제공합니다.' },
+    { id: 2, icon: '✅', title: '진행 중인 과제', content: '1. UX/UI 설계\n2. 프론트엔드 화면 구현\n3. 상태 관리 연동' },
+    { id: 3, icon: '💡', title: '아이디어 노트', content: '새로운 프로젝트 아이디어를 자유롭게 적어보세요.' },
+  ]);
+  
+  const [activePageId, setActivePageId] = useState(1);
+
+  // 현재 활성화된 페이지 찾기
+  const activePage = pages.find(page => page.id === activePageId) || pages[0];
+
+  // 페이지 내용 업데이트 핸들러
+  const handlePageUpdate = (field, value) => {
+    setPages(pages.map(page => 
+      page.id === activePageId ? { ...page, [field]: value } : page
+    ));
+  };
+
+  // 새 페이지 생성 핸들러
+  const handleAddPage = () => {
+    const newPage = {
+      id: Date.now(),
+      icon: '📄',
+      title: '',
+      content: ''
+    };
+    setPages([...pages, newPage]);
+    setActivePageId(newPage.id);
+  };
+
+  return (
+    <div className="flex h-screen w-full bg-white text-gray-800 font-sans">
+      
+      {/* 1. 사이드바 (Sidebar) 영역 */}
+      <div className={`${isSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 ease-in-out bg-[#F7F7F5] border-r border-gray-200 flex flex-col overflow-hidden hidden md:flex shrink-0`}>
+        {/* 워크스페이스 스위처 */}
+        <div className="p-4 hover:bg-gray-200 cursor-pointer flex items-center gap-2 transition-colors">
+          <div className="w-5 h-5 bg-gray-400 rounded flex items-center justify-center text-white text-xs font-bold">
+            U
+          </div>
+          <span className="font-semibold text-sm truncate">User님의 워크스페이스</span>
+        </div>
+
+        {/* 유틸리티 메뉴 */}
+        <div className="px-2 pb-4 space-y-1 text-sm text-gray-600">
+          <div className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded cursor-pointer transition-colors">
+            <Search size={16} />
+            <span>검색</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded cursor-pointer transition-colors">
+            <Settings size={16} />
+            <span>설정과 멤버</span>
+          </div>
+        </div>
+
+        {/* 페이지 리스트 */}
+        <div className="flex-1 overflow-y-auto px-2">
+          <div className="text-xs font-semibold text-gray-500 p-2 group flex justify-between items-center">
+            <span>개인 페이지</span>
+            <Plus size={14} className="opacity-0 group-hover:opacity-100 cursor-pointer hover:bg-gray-300 rounded" onClick={handleAddPage} />
+          </div>
+          
+          <div className="space-y-0.5">
+            {pages.map((page) => (
+              <div 
+                key={page.id}
+                onClick={() => setActivePageId(page.id)}
+                className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm transition-colors ${activePageId === page.id ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200/50 text-gray-600'}`}
+              >
+                <ChevronRight size={14} className="text-gray-400" />
+                <span>{page.icon}</span>
+                <span className="truncate">{page.title || '제목 없음'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 새 페이지 버튼 (하단) */}
+        <div 
+          onClick={handleAddPage}
+          className="p-3 border-t border-gray-200 text-gray-500 hover:bg-gray-200 cursor-pointer flex items-center gap-2 text-sm transition-colors"
+        >
+          <Plus size={16} />
+          <span>새 페이지</span>
+        </div>
+      </div>
+
+      {/* 2. 메인 에디터 (Main Content) 영역 */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        
+        {/* 상단 네비게이션 바 */}
+        <header className="h-12 border-b border-transparent hover:border-gray-100 flex items-center justify-between px-4 shrink-0 transition-colors">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-1 hover:bg-gray-100 rounded md:hidden"
+            >
+              <Menu size={18} />
+            </button>
+            <span className="cursor-pointer hover:underline">{activePage.icon} {activePage.title || '제목 없음'}</span>
+          </div>
+          
+          <div className="flex items-center gap-3 text-sm text-gray-600">
+            <span className="hidden sm:inline-block cursor-pointer hover:underline">편집됨</span>
+            <div className="flex items-center gap-2 px-3 py-1 hover:bg-gray-100 rounded cursor-pointer transition-colors">
+              <Share size={14} />
+              <span>공유</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 hover:bg-gray-100 rounded cursor-pointer transition-colors">
+              <MessageSquare size={14} />
+              <span>댓글</span>
+            </div>
+            <div className="p-1 hover:bg-gray-100 rounded cursor-pointer transition-colors">
+              <MoreHorizontal size={18} />
+            </div>
+          </div>
+        </header>
+
+        {/* 에디터 본문 영역 */}
+        <div className="flex-1 overflow-y-auto w-full">
+          <div className="max-w-3xl mx-auto px-12 py-16 w-full">
+            
+            {/* 아이콘 및 커버 (가상) */}
+            <div className="group relative w-fit mb-6 cursor-pointer">
+              <div className="text-6xl">{activePage.icon}</div>
+              <div className="absolute -top-8 left-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white border shadow-sm text-xs px-2 py-1 rounded whitespace-nowrap text-gray-500">
+                아이콘 변경
+              </div>
+            </div>
+
+            {/* 페이지 제목 입력 (H1) */}
+            <input
+              type="text"
+              value={activePage.title}
+              onChange={(e) => handlePageUpdate('title', e.target.value)}
+              placeholder="제목 없음"
+              className="w-full text-4xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-8"
+            />
+
+            {/* 본문 내용 입력 (Textarea) */}
+            <textarea
+              value={activePage.content}
+              onChange={(e) => handlePageUpdate('content', e.target.value)}
+              placeholder="'/'를 입력해 명령어를 사용해보세요."
+              className="w-full h-[500px] text-base text-gray-700 placeholder-gray-300 border-none outline-none bg-transparent resize-none leading-relaxed"
+            />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
